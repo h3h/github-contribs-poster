@@ -29,12 +29,14 @@ THEMES = {
                        bins=["#292e42", "#3b3566", "#5d4794", "#9d7cd8", "#c879d6", "#ff007c"],
                        langs={"Ruby": "#ff007c", "JavaScript": "#e0af68", "TypeScript": "#2ac3de", "Python": "#9ece6a",
                               "Shell": "#7dcfff", "Nix": "#7aa2f7", "HTML": "#ff9e64", "CSS": "#1abc9c",
-                              "CoffeeScript": "#c0caf5", "Other": "#565f89"},
-                       lang_cycle=["#bb9af7", "#f7768e", "#73daca"]),
+                              "CoffeeScript": "#c0caf5", "Java": "#bb9af7", "Other": "#565f89"},
+                       lang_cycle=["#f7768e", "#73daca", "#b4f9f8"]),
 }
 args = argparse.ArgumentParser(description=__doc__.splitlines()[0])
 args.add_argument("theme", nargs="?", default="tokyonight", choices=THEMES)
 args.add_argument("--eras", type=Path, default=HERE / "eras.yaml", help="eras file (default: eras.yaml)")
+args.add_argument("--lang-scale", choices=["sqrt", "log", "linear"], default="sqrt",
+                  help="height scale for the language chart (default: sqrt)")
 args = args.parse_args()
 THEME = args.theme
 T = THEMES[THEME]
@@ -220,7 +222,8 @@ for k in month_keys:
     for src in (measured[k], declared[k]):
         for l, v in src.items():
             lang_total[l] = lang_total.get(l, 0) + v
-TOP = [l for l, _ in sorted(lang_total.items(), key=lambda x: -x[1]) if l != "Other"][:8]
+# Every language with at least 5 commits' worth of activity gets its own band; the rest is "Other".
+TOP = [l for l, v in sorted(lang_total.items(), key=lambda x: -x[1]) if l != "Other" and v >= 5][:12]
 order = TOP + (["Other"] if set(lang_total) - set(TOP) else [])
 cycle = iter(T["lang_cycle"])
 lang_color = {l: T["langs"].get(l) or next(cycle, T["langs"]["Other"]) for l in order}
@@ -248,12 +251,14 @@ la_top = base + 70
 la_h = 360
 stack_max = max((sum(v[i] for _, _, v in layers) for i in range(len(month_keys))), default=0)
 if layers and stack_max > 0:
-    # Square-root height so early years stay visible next to the 2026 surge; within each month the
-    # layers keep their true proportions of that month's total.
+    # A compressed height (sqrt or log) keeps early years visible next to the 2026 surge; within
+    # each month the layers keep their true proportions of that month's total.
+    import math
+    hscale = {"sqrt": lambda t: t ** 0.5, "log": lambda t: math.log1p(t), "linear": lambda t: t}[args.lang_scale]
     totals = [sum(v[i] for _, _, v in layers) for i in range(len(month_keys))]
-    k_sqrt = la_h / stack_max ** 0.5
+    k_h = la_h / hscale(stack_max)
     def thickness(v, i):
-        return v / totals[i] * totals[i] ** 0.5 * k_sqrt if totals[i] > 0 else 0
+        return v / totals[i] * hscale(totals[i]) * k_h if totals[i] > 0 else 0
     mx = [x0 + (int(k[:4]) - years[0] + (int(k[5:]) - 0.5) / 12) * bw for k in month_keys]
 
     def curve(ys, reverse=False):
@@ -276,8 +281,9 @@ if layers and stack_max > 0:
             f'<rect width="7" height="7" fill="{c}" opacity="0.22"/><line x1="0" y1="0" x2="0" y2="7" stroke="{c}" stroke-width="3"/></pattern>')
     add("</defs>")
     # faint gridline at a round per-month value
-    for g in (v for v in (5, 25, 100, 250, 500, 1000) if v <= stack_max):
-        gy = la_top + g ** 0.5 * k_sqrt
+    grid = {"sqrt": (5, 25, 100, 250, 500, 1000), "log": (1, 5, 25, 100, 500), "linear": (50, 100, 150, 200, 250)}
+    for g in (v for v in grid[args.lang_scale] if v <= stack_max):
+        gy = la_top + hscale(g) * k_h
         add(f'<line x1="{x0}" x2="{x1}" y1="{gy:.1f}" y2="{gy:.1f}" stroke="{T["muted"]}" stroke-width="1" stroke-dasharray="2 6" opacity="0.6"/>')
         text(x0 - 10, gy + 4, f"{g}/mo", 13, T["muted"], "end", family=MONO)
     upper = [la_top] * len(month_keys)
@@ -297,7 +303,7 @@ if layers and stack_max > 0:
         if thick >= 14:
             text(mx[i], (u + lo) / 2 + 5, l, 14, T["bright"], "middle", weight=700,
                  extra=f'stroke="{T["bg"]}" stroke-width="3.5" paint-order="stroke"')
-    text(x0, la_top + la_h + 34, "Code activity per month by language · smoothed · height on a square-root scale", 16, T["muted"])
+    text(x0, la_top + la_h + 34, "Code activity per month by language · smoothed · " + {"sqrt": "height on a square-root scale", "log": "height on a log scale", "linear": "linear height"}[args.lang_scale], 16, T["muted"])
     la_bottom = la_top + la_h + 34
 else:
     la_bottom = base + 70
@@ -313,13 +319,17 @@ if layers:
     ly += 40
     lx_ = x0
     for l in order:
+        item_w = 24 + len(l) * 10 + 34
+        if lx_ + item_w > x1:
+            lx_, ly = x0, ly + 34
         add(f'<rect x="{lx_}" y="{ly - 14}" width="16" height="16" rx="3" fill="{lang_color[l]}"/>')
         text(lx_ + 24, ly, l, 18, T["fg"])
-        lx_ += 24 + len(l) * 10 + 34
+        lx_ += item_w
+    ly += 34
     if any(is_decl for _, is_decl, _ in layers):
-        text(x1, ly, "solid: measured from git history · hatched: estimated from eras.yaml", 16, T["muted"], "end")
+        text(x0, ly, "solid: measured from git history · hatched: estimated from eras.yaml", 16, T["muted"])
     else:
-        text(x1, ly, "measured from git history", 16, T["muted"], "end")
+        text(x0, ly, "measured from git history", 16, T["muted"])
 
 # Lifetime heatmap: two columns of years, GitHub-style week x weekday grid.
 hm_top = ly + 130
