@@ -27,10 +27,10 @@ THEMES = {
     "tokyonight": dict(bg="#1a1b26", band="#24283b", muted="#565f89", fg="#a9b1d6", bright="#c0caf5",
                        accent="#ff007c", pub="#ff007c", priv="#9d7cd8", sub="#bb9af7",
                        bins=["#292e42", "#3b3566", "#5d4794", "#9d7cd8", "#c879d6", "#ff007c"],
-                       langs={"Ruby": "#ff007c", "JavaScript": "#e0af68", "TypeScript": "#2ac3de", "Python": "#9ece6a",
-                              "Shell": "#7dcfff", "Nix": "#7aa2f7", "HTML": "#ff9e64", "CSS": "#1abc9c",
+                       langs={"Ruby": "#ff007c", "JavaScript": "#00a2ff", "TypeScript": "#00e5ff", "Python": "#3d5afe",
+                              "Shell": "#7c4dff", "Nix": "#7aa2f7", "HTML": "#ff9e64", "CSS": "#c13cff",
                               "CoffeeScript": "#c0caf5", "Java": "#bb9af7", "Other": "#565f89"},
-                       lang_cycle=["#f7768e", "#73daca", "#b4f9f8"]),
+                       lang_cycle=["#f7768e", "#ff6ec7", "#b4f9f8"]),
 }
 args = argparse.ArgumentParser(description=__doc__.splitlines()[0])
 args.add_argument("theme", nargs="?", default="tokyonight", choices=THEMES)
@@ -309,15 +309,23 @@ if layers and stack_max > 0:
 else:
     la_bottom = base + 70
 
-# Legends: bars, then languages
-ly = la_bottom + 56
-add(f'<rect x="{x0}" y="{ly - 14}" width="16" height="16" fill="{T["pub"]}"/>')
-text(x0 + 26, ly, "public repos", 18, T["fg"])
-add(f'<rect x="{x0 + 180}" y="{ly - 14}" width="16" height="16" fill="{T["priv"]}"/>')
-text(x0 + 206, ly, "private repos (counts only)", 18, T["fg"])
-text(x1, ly, "contributions per year", 18, T["muted"], "end")
+# Bar legend: direct labels in the right margin, beside the last bar's two segments.
+last = years[-1]
+seg_priv, seg_pub = PRIV[last] * scale, (by_year[last] - PRIV[last]) * scale
+priv_y = base - seg_priv / 2
+pub_y = min(base - seg_priv - seg_pub / 2, priv_y - 44)
+mx_ = x1 + 10
+text(mx_, pub_y - 34, "contributions", 13, T["muted"])
+text(mx_, pub_y - 18, "per year", 13, T["muted"])
+add(f'<rect x="{mx_}" y="{pub_y - 9}" width="12" height="12" fill="{T["pub"]}"/>')
+text(mx_ + 18, pub_y + 2, "public", 15, T["fg"])
+add(f'<rect x="{mx_}" y="{priv_y - 9}" width="12" height="12" fill="{T["priv"]}"/>')
+text(mx_ + 18, priv_y + 2, "private", 15, T["fg"])
+text(mx_ + 18, priv_y + 19, "counts only", 12, T["muted"])
+
+# Language legend
+ly = la_bottom + 40
 if layers:
-    ly += 40
     lx_ = x0
     for l in order:
         item_w = 24 + len(l) * 10 + 34
