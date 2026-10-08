@@ -4,6 +4,8 @@ An all-time GitHub contributions poster: contributions per year (public vs priva
 
 ![Tokyo Night poster](output/h3h-github-all-time-tokyonight.png)
 
+Interactive version: https://h3h.github.io/github-contribs-poster/
+
 ## Usage
 
 ```sh
