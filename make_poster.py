@@ -4,7 +4,7 @@
 Usage: make_poster.py [tokyonight|solarized] [--eras eras.yaml]
 Reads data/contributions.json and the eras file, writes output/.
 """
-import argparse, calendar, colorsys, html, json, sys, datetime as dt
+import argparse, calendar, html, json, sys, datetime as dt
 from pathlib import Path
 
 HERE = Path(__file__).parent
@@ -30,9 +30,6 @@ THEMES = {
                        langs={"Ruby": "#ff2bd6", "JavaScript": "#00a2ff", "TypeScript": "#ffffff", "Python": "#3d5afe",
                               "Shell": "#7c4dff", "Nix": "#7aa2f7", "HTML": "#ff9e64", "CSS": "#c13cff",
                               "CoffeeScript": "#00e5ff", "Java": "#bb9af7", "Other": "#565f89"},
-                       # Desaturating turns hot colors dull and does nothing to white, so these
-                       # get explicit muted colors for their estimated bands.
-                       langs_muted={"Ruby": "#a86bb0", "TypeScript": "#a9b1d6", "CoffeeScript": "#9cc7e6"},
                        lang_cycle=["#f7768e", "#ff6ec7", "#b4f9f8"]),
 }
 args = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -217,7 +214,7 @@ add(f'<line x1="{x0}" x2="{x1}" y1="{base}" y2="{base}" stroke="{T["muted"]}" st
 text(X(years[-1]) + bw / 2, base + 52, f"through {AS_OF[5:7]}/{AS_OF[8:]}", 14, T["muted"], "middle")
 
 # Languages: inverted, smoothed, stacked area hanging below the bars, on the same x axis.
-# Bright = commits measured from git history (fetch_languages.py); muted = the rest of that
+# Each band = commits measured from git history (fetch_languages.py) plus the rest of that
 # month's contributions, split by the era's declared `languages` mix in eras.yaml.
 month_keys = [f"{y}-{m:02d}" for y in years for m in range(1, 13) if f"{y}-{m:02d}" <= AS_OF[:7]]
 contrib_month = {k: 0 for k in month_keys}
@@ -262,21 +259,20 @@ def series(src, lang):
         out_.append(acc / norm)
     return out_
 
-layers = []  # (lang, is_declared, values)
+layers = []  # (lang, smoothed measured + estimated values, raw measured, raw estimated)
 for l in order:
-    for is_decl, src in ((False, measured), (True, declared)):
-        vals = series(src, l)
-        if max(vals, default=0) > 0.05:
-            layers.append((l, is_decl, vals, raw(src, l)))
+    vals = [m + e for m, e in zip(series(measured, l), series(declared, l))]
+    if max(vals, default=0) > 0.05:
+        layers.append((l, vals, raw(measured, l), raw(declared, l)))
 la_top = base + 70
 la_h = 360
-stack_max = max((sum(v[i] for _, _, v, _ in layers) for i in range(len(month_keys))), default=0)
+stack_max = max((sum(v[i] for _, v, _, _ in layers) for i in range(len(month_keys))), default=0)
 if layers and stack_max > 0:
     # A compressed height (sqrt or log) keeps early years visible next to the 2026 surge; within
     # each month the layers keep their true proportions of that month's total.
     import math
     hscale = {"sqrt": lambda t: t ** 0.5, "log": lambda t: math.log1p(t), "linear": lambda t: t}[args.lang_scale]
-    totals = [sum(v[i] for _, _, v, _ in layers) for i in range(len(month_keys))]
+    totals = [sum(v[i] for _, v, _, _ in layers) for i in range(len(month_keys))]
     k_h = la_h / hscale(stack_max)
     def thickness(v, i):
         return v / totals[i] * hscale(totals[i]) * k_h if totals[i] > 0 else 0
@@ -295,13 +291,6 @@ if layers and stack_max > 0:
             d += f" C{c1[0]:.1f},{c1[1]:.1f} {c2[0]:.1f},{c2[1]:.1f} {p2[0]:.1f},{p2[1]:.1f}"
         return d
 
-    def desaturate(hex_color, keep):
-        r, g, b = (int(hex_color[i:i + 2], 16) / 255 for i in (1, 3, 5))
-        h, l, s_ = colorsys.rgb_to_hls(r, g, b)
-        return "#" + "".join(f"{round(c * 255):02x}" for c in colorsys.hls_to_rgb(h, l, s_ * keep))
-
-    def blend(a, b, t):
-        return "#" + "".join(f"{round(int(a[i:i + 2], 16) * (1 - t) + int(b[i:i + 2], 16) * t):02x}" for i in (1, 3, 5))
     # faint gridline at a round per-month value
     grid = {"sqrt": (5, 25, 100, 250, 500, 1000), "log": (1, 5, 25, 100, 500), "linear": (50, 100, 150, 200, 250)}
     for g in (v for v in grid[args.lang_scale] if v <= stack_max):
@@ -310,24 +299,20 @@ if layers and stack_max > 0:
         text(x0 - 10, gy + 4, f"{g}/mo", 13, T["muted"], "end", family=MONO)
     upper = [la_top] * len(month_keys)
     label_at = {}
-    for l, is_decl, vals, raw_vals in layers:
+    def series_json(vals):
+        return json.dumps([round(v, 1) for v in vals], separators=(",", ":"))
+    for l, vals, raw_meas, raw_est in layers:
         lower = [u + thickness(v, i) for i, (u, v) in enumerate(zip(upper, vals))]
         d = "M" + curve(upper)[1:] + " " + curve(lower, reverse=True) + " Z"
-        meta_ = tag("layer", lang=l, kind="estimated" if is_decl else "measured", color=lang_color[l],
-                    total=round(sum(raw_vals)), vals=json.dumps([round(v, 1) for v in raw_vals], separators=(",", ":")))
-        if is_decl:  # estimated: muted fill, slightly more saturated outline
-            c = lang_color[l]
-            muted = T.get("langs_muted", {}).get(l)
-            fill, edge = (muted, blend(c, muted, 0.5)) if muted else (desaturate(c, 0.3), desaturate(c, 0.6))
-            add(f'<path d="{d}" fill="{fill}" stroke="{edge}" stroke-width="1.5" stroke-linejoin="round"{meta_}/>')
-        else:
-            add(f'<path d="{d}" fill="{lang_color[l]}"{meta_}/>')
+        meta_ = tag("layer", lang=l, color=lang_color[l], measured=round(sum(raw_meas)), estimated=round(sum(raw_est)),
+                    vals=series_json(raw_meas), est=series_json(raw_est))
+        add(f'<path d="{d}" fill="{lang_color[l]}"{meta_}/>')
         for i, (u, lo) in enumerate(zip(upper, lower)):
             best = label_at.get(l)
             if x0 + 60 < mx[i] < x1 - 60 and (not best or lo - u > best[0]):
                 label_at[l] = (lo - u, i, u, lo)
         upper = lower
-    # label each language where its (measured) band is thickest
+    # label each language where its band is thickest
     for l, (thick, i, u, lo) in label_at.items():
         if thick >= 14:
             text(mx[i], (u + lo) / 2 + 5, l, 14, T["bright"], "middle", weight=700,
@@ -367,8 +352,8 @@ if layers:
         add("</g>")
         lx_ += item_w
     ly += 34
-    if any(is_decl for _, is_decl, _, _ in layers):
-        text(x0, ly, "bright: measured from git history · muted: estimated from eras.yaml", 16, T["muted"])
+    if any(sum(est) for _, _, _, est in layers):
+        text(x0, ly, "measured from git history, plus estimates from eras.yaml where git history is missing", 16, T["muted"])
     else:
         text(x0, ly, "measured from git history", 16, T["muted"])
 

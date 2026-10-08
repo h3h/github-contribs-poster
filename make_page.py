@@ -34,7 +34,7 @@ PAGE = """<!doctype html>
   /* eras: light up the band under the pointer */
   .era:hover { opacity: .9; }
 
-  /* languages: spotlight one language across measured + estimated bands and the legend */
+  /* languages: spotlight one language band and its legend entry */
   .lang-focus .layer { opacity: .16; }
   .lang-focus .layer.on { opacity: 1; filter: brightness(1.15) saturate(1.15); }
   .lang-focus .key { opacity: .35; }
@@ -79,12 +79,9 @@ __SVG__
   svg.appendChild(guide);
 
   const layers = [...svg.querySelectorAll(".layer")];
-  const layerVals = new Map(layers.map(el => [el, JSON.parse(el.dataset.vals)]));
-  const totals = {};
-  for (const el of layers) {
-    const t = totals[el.dataset.lang] ||= { measured: 0, estimated: 0, color: el.dataset.color };
-    t[el.dataset.kind] += +el.dataset.total;
-  }
+  const layerVals = new Map(layers.map(el => [el, [JSON.parse(el.dataset.vals), JSON.parse(el.dataset.est)]]));
+  const totals = Object.fromEntries(layers.map(el =>
+    [el.dataset.lang, { measured: +el.dataset.measured, estimated: +el.dataset.estimated, color: el.dataset.color }]));
 
   function el(tag, cls, text) {
     const e = document.createElement(tag);
@@ -147,13 +144,11 @@ __SVG__
       const i = Math.min(nMonths - 1, Math.max(0, Math.floor((svgX(e) - x0) / bw * 12)));
       const gx = x0 + (i + 0.5) / 12 * bw;
       guide.setAttribute("x1", gx); guide.setAttribute("x2", gx); guide.setAttribute("opacity", ".7");
-      const v = layerVals.get(t)[i];
+      const [meas, est] = layerVals.get(t);
       const month = MONTHS[i % 12] + " " + (y0 + Math.floor(i / 12));
-      const est = d.kind === "estimated";
-      show([header(d.lang, d.color),
-            el("div", "s", est ? "estimated from eras.yaml" : "measured from git history"),
-            row(month, (est ? "≈ " : "") + fmt(v) + (est ? " contributions" : " commits")),
-            row("all-time " + d.kind, fmt(d.total))], e);
+      const nodes = [header(d.lang, d.color), el("div", "s", month), row("commits (git history)", fmt(meas[i]))];
+      if (est[i] >= 0.5) nodes.push(row("estimated (eras.yaml)", "≈ " + fmt(est[i])));
+      show(nodes, e);
     } else if (t.classList.contains("key")) {
       focus("lang-focus", n => n.dataset.lang === d.lang);
       const tot = totals[d.lang] || { measured: 0, estimated: 0 };
