@@ -4,7 +4,7 @@
 Usage: make_poster.py [tokyonight|solarized] [--eras eras.yaml]
 Reads data/contributions.json and the eras file, writes output/.
 """
-import argparse, calendar, json, sys, datetime as dt
+import argparse, calendar, colorsys, json, sys, datetime as dt
 from pathlib import Path
 
 HERE = Path(__file__).parent
@@ -199,7 +199,7 @@ add(f'<line x1="{x0}" x2="{x1}" y1="{base}" y2="{base}" stroke="{T["muted"]}" st
 text(X(years[-1]) + bw / 2, base + 52, f"through {AS_OF[5:7]}/{AS_OF[8:]}", 14, T["muted"], "middle")
 
 # Languages: inverted, smoothed, stacked area hanging below the bars, on the same x axis.
-# Solid = commits measured from git history (fetch_languages.py); hatched = the rest of that
+# Bright = commits measured from git history (fetch_languages.py); muted = the rest of that
 # month's contributions, split by the era's declared `languages` mix in eras.yaml.
 month_keys = [f"{y}-{m:02d}" for y in years for m in range(1, 13) if f"{y}-{m:02d}" <= AS_OF[:7]]
 contrib_month = {k: 0 for k in month_keys}
@@ -274,12 +274,10 @@ if layers and stack_max > 0:
             d += f" C{c1[0]:.1f},{c1[1]:.1f} {c2[0]:.1f},{c2[1]:.1f} {p2[0]:.1f},{p2[1]:.1f}"
         return d
 
-    add("<defs>")
-    for l in order:
-        c = lang_color[l]
-        add(f'<pattern id="hatch-{order.index(l)}" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)">'
-            f'<rect width="7" height="7" fill="{c}" opacity="0.22"/><line x1="0" y1="0" x2="0" y2="7" stroke="{c}" stroke-width="3"/></pattern>')
-    add("</defs>")
+    def desaturate(hex_color, keep):
+        r, g, b = (int(hex_color[i:i + 2], 16) / 255 for i in (1, 3, 5))
+        h, l, s_ = colorsys.rgb_to_hls(r, g, b)
+        return "#" + "".join(f"{round(c * 255):02x}" for c in colorsys.hls_to_rgb(h, l, s_ * keep))
     # faint gridline at a round per-month value
     grid = {"sqrt": (5, 25, 100, 250, 500, 1000), "log": (1, 5, 25, 100, 500), "linear": (50, 100, 150, 200, 250)}
     for g in (v for v in grid[args.lang_scale] if v <= stack_max):
@@ -291,8 +289,11 @@ if layers and stack_max > 0:
     for l, is_decl, vals in layers:
         lower = [u + thickness(v, i) for i, (u, v) in enumerate(zip(upper, vals))]
         d = "M" + curve(upper)[1:] + " " + curve(lower, reverse=True) + " Z"
-        fill = f"url(#hatch-{order.index(l)})" if is_decl else lang_color[l]
-        add(f'<path d="{d}" fill="{fill}"/>')
+        if is_decl:  # estimated: muted fill, slightly more saturated outline
+            c = lang_color[l]
+            add(f'<path d="{d}" fill="{desaturate(c, 0.3)}" stroke="{desaturate(c, 0.6)}" stroke-width="1.5" stroke-linejoin="round"/>')
+        else:
+            add(f'<path d="{d}" fill="{lang_color[l]}"/>')
         for i, (u, lo) in enumerate(zip(upper, lower)):
             best = label_at.get(l)
             if x0 + 60 < mx[i] < x1 - 60 and (not best or lo - u > best[0]):
@@ -327,7 +328,7 @@ if layers:
         lx_ += item_w
     ly += 34
     if any(is_decl for _, is_decl, _ in layers):
-        text(x0, ly, "solid: measured from git history · hatched: estimated from eras.yaml", 16, T["muted"])
+        text(x0, ly, "bright: measured from git history · muted: estimated from eras.yaml", 16, T["muted"])
     else:
         text(x0, ly, "measured from git history", 16, T["muted"])
 

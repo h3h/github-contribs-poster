@@ -8,7 +8,7 @@
 #              leave it out for an era that is still going (only the last era)
 #   languages: optional; a rough language mix for the era, as relative weights, e.g.
 #              {Ruby: 70, JavaScript: 30}. It fills in the contributions that git history
-#              can't attribute (see fetch_languages.py) and is drawn hatched as an estimate.
+#              can't attribute (see fetch_languages.py) and is drawn in muted colors as an estimate.
 #
 # List eras in date order; they must not overlap, but gaps are fine.
 # Delete every entry (or this file) to render the poster with no eras.

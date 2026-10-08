@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 """Measure a user's commits per language per month from git history into data/languages.json.
 
-Usage: fetch_languages.py [--local REPO_DIR ...] [--author PATTERN ...]
+Usage: fetch_languages.py [--local REPO_DIR ...] [--author PATTERN ...] [--branches]
 
 Sources:
   - every repo GitHub lists commit contributions for (cloned into .cache/repos/ unless a --local
     clone of it exists), which in practice is the public slice;
   - any --local clones, e.g. private work repos GitHub only reports as counts.
+
+By default only each repo's default branch counts, matching GitHub. --branches also counts
+unmerged work on local and origin branches, skipping branches whose pull request was merged
+(their work is already on the default branch, often squashed into one commit).
 
 Each commit by the author counts as 1, split across languages by lines changed in code files
 (docs, config, data, lockfiles, and vendored/generated paths are ignored). Only aggregate monthly
@@ -69,9 +73,30 @@ def visible_repos(login, years):
     return repos
 
 
-def measure(repo, authors, months):
+def merged_pr_branches(repo):
+    name = slug(git(repo, "remote", "get-url", "origin"))
+    if not name:
+        return set()
+    out = subprocess.run(["gh", "pr", "list", "--repo", name, "--state", "merged", "--limit", "5000",
+                          "--json", "headRefName", "--jq", ".[].headRefName"], capture_output=True, text=True).stdout
+    return set(out.split())
+
+
+def refs_to_scan(repo, branches):
+    """The default branch, plus (with branches) every local/origin branch whose PR hasn't merged."""
+    refs = [default_ref(repo)]
+    if branches:
+        merged = merged_pr_branches(repo)
+        for ref in git(repo, "for-each-ref", "--format=%(refname:short)", "refs/heads", "refs/remotes/origin").split():
+            name = ref.removeprefix("origin/")
+            if name != "HEAD" and ref != "origin" and name not in merged:
+                refs.append(ref)
+    return refs
+
+
+def measure(repo, authors, months, branches=False):
     """Add this repo's commits by the author into months[YYYY-MM][language]; return the commit count."""
-    log = git(repo, "log", default_ref(repo), "--no-merges", "--numstat", "--format=@%aI",
+    log = git(repo, "log", *refs_to_scan(repo, branches), "--no-merges", "--numstat", "--format=@%aI",
               *[f"--author={a}" for a in authors])
     commits = 0
     def flush(month, lines):
@@ -101,6 +126,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--local", nargs="*", default=[], type=Path, help="local clones to measure")
     ap.add_argument("--author", action="append", help="git --author pattern (default: git user.name and login)")
+    ap.add_argument("--branches", action="store_true", help="also count unmerged branch commits")
     ap.add_argument("--cache", type=Path, default=HERE / ".cache" / "repos")
     args = ap.parse_args()
     authors = args.author or [a for a in [git(".", "config", "user.name").strip(), login] if a]
@@ -124,16 +150,16 @@ def main():
         else:
             subprocess.run(["gh", "repo", "clone", name, str(dest), "--", "--quiet"], check=False)
         if dest.exists():
-            n = measure(dest, authors, months)
+            n = measure(dest, authors, months, args.branches)
             total += n
             print(f"{n:6} {name}", file=sys.stderr)
     for path in local.values():
-        n = measure(path, authors, months)
+        n = measure(path, authors, months, args.branches)
         total += n
         print(f"{n:6} (local) {path.name}", file=sys.stderr)
 
     out = HERE / "data" / "languages.json"
-    out.write_text(json.dumps({"authors": authors, "commits": total,
+    out.write_text(json.dumps({"authors": authors, "commits": total, "branches": args.branches,
                                "months": {m: {l: round(v, 2) for l, v in sorted(ls.items())} for m, ls in sorted(months.items())}},
                               indent=1) + "\n")
     print(f"wrote {out} ({total} commits)")
