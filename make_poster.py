@@ -27,11 +27,12 @@ THEMES = {
     "tokyonight": dict(bg="#1a1b26", band="#24283b", muted="#565f89", fg="#a9b1d6", bright="#c0caf5",
                        accent="#ff007c", pub="#ff007c", priv="#9d7cd8", sub="#bb9af7",
                        bins=["#292e42", "#3b3566", "#5d4794", "#9d7cd8", "#c879d6", "#ff007c"],
-                       langs={"Ruby": "#ffffff", "JavaScript": "#00a2ff", "TypeScript": "#00e5ff", "Python": "#3d5afe",
+                       langs={"Ruby": "#ff2bd6", "JavaScript": "#00a2ff", "TypeScript": "#ffffff", "Python": "#3d5afe",
                               "Shell": "#7c4dff", "Nix": "#7aa2f7", "HTML": "#ff9e64", "CSS": "#c13cff",
-                              "CoffeeScript": "#ff007c", "Java": "#bb9af7", "Other": "#565f89"},
-                       # Desaturating does nothing to white, so estimated Ruby gets an explicit muted color.
-                       langs_muted={"Ruby": "#a9b1d6"},
+                              "CoffeeScript": "#00e5ff", "Java": "#bb9af7", "Other": "#565f89"},
+                       # Desaturating turns hot colors dull and does nothing to white, so these
+                       # get explicit muted colors for their estimated bands.
+                       langs_muted={"Ruby": "#a86bb0", "TypeScript": "#a9b1d6", "CoffeeScript": "#9cc7e6"},
                        lang_cycle=["#f7768e", "#ff6ec7", "#b4f9f8"]),
 }
 args = argparse.ArgumentParser(description=__doc__.splitlines()[0])
