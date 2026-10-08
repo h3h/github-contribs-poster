@@ -10,17 +10,27 @@ from pathlib import Path
 HERE = Path(__file__).parent
 DATA = json.loads((HERE / "data" / "contributions.json").read_text())
 LOGIN, AS_OF, DAYS = DATA["login"], DATA["as_of"], DATA["days"]
+LANG_DATA = HERE / "data" / "languages.json"
+MEASURED = json.loads(LANG_DATA.read_text())["months"] if LANG_DATA.exists() else {}
 # Private (restricted) contributions are only available as per-year counts.
 PRIV = {int(y): n for y, n in DATA["private_by_year"].items()}
 
 THEMES = {
     "solarized": dict(bg="#002b36", band="#073642", muted="#586e75", fg="#839496", bright="#93a1a1",
                       accent="#b58900", pub="#b58900", priv="#268bd2", sub="#2aa198",
-                      bins=["#073642", "#0f5257", "#1d7a73", "#2aa198", "#8f9a2c", "#b58900"]),
+                      bins=["#073642", "#0f5257", "#1d7a73", "#2aa198", "#8f9a2c", "#b58900"],
+                      langs={"Ruby": "#dc322f", "JavaScript": "#b58900", "TypeScript": "#268bd2", "Python": "#859900",
+                             "Shell": "#2aa198", "Nix": "#6c71c4", "HTML": "#cb4b16", "CSS": "#d33682",
+                             "CoffeeScript": "#93a1a1", "Other": "#586e75"},
+                      lang_cycle=["#eee8d5", "#657b83", "#839496"]),
     # Tokyo Night (folke/tokyonight.nvim "night"), pushed toward magenta/pink.
     "tokyonight": dict(bg="#1a1b26", band="#24283b", muted="#565f89", fg="#a9b1d6", bright="#c0caf5",
                        accent="#ff007c", pub="#ff007c", priv="#9d7cd8", sub="#bb9af7",
-                       bins=["#292e42", "#3b3566", "#5d4794", "#9d7cd8", "#c879d6", "#ff007c"]),
+                       bins=["#292e42", "#3b3566", "#5d4794", "#9d7cd8", "#c879d6", "#ff007c"],
+                       langs={"Ruby": "#ff007c", "JavaScript": "#e0af68", "TypeScript": "#2ac3de", "Python": "#9ece6a",
+                              "Shell": "#7dcfff", "Nix": "#7aa2f7", "HTML": "#ff9e64", "CSS": "#1abc9c",
+                              "CoffeeScript": "#c0caf5", "Other": "#565f89"},
+                       lang_cycle=["#bb9af7", "#f7768e", "#73daca"]),
 }
 args = argparse.ArgumentParser(description=__doc__.splitlines()[0])
 args.add_argument("theme", nargs="?", default="tokyonight", choices=THEMES)
@@ -54,7 +64,7 @@ def as_lines(value):
 
 
 def load_eras(path):
-    """Eras as (start, end or None, title lines, subtitle lines), validated to be ordered and non-overlapping."""
+    """Eras as (start, end or None, title lines, subtitle lines, language shares), validated to be ordered and non-overlapping."""
     if not path.exists():
         return []
     try:
@@ -81,7 +91,11 @@ def load_eras(path):
                 sys.exit(f"{where}: only the last era can leave out an end date")
             if start <= prev_end:
                 sys.exit(f"{where}: starts on or before the previous era ends ({prev_end}); eras must be in order and not overlap")
-        eras.append((start, end, as_lines(e["title"]), as_lines(e.get("subtitle"))))
+        langs = e.get("languages") or {}
+        if not isinstance(langs, dict) or not all(isinstance(v, (int, float)) and v > 0 for v in langs.values()):
+            sys.exit(f"{where}: languages must map language names to positive weights, e.g. {{Ruby: 70, JavaScript: 30}}")
+        weight = sum(langs.values())
+        eras.append((start, end, as_lines(e["title"]), as_lines(e.get("subtitle")), {str(k): v / weight for k, v in langs.items()}))
     return eras
 
 
@@ -106,15 +120,13 @@ def streak():
         best = max(best, cur)
     return best
 
-W, H = 1800, 1290 + 10 * (7 * 12.6 + 28) + 170
+W = 1800
 out = []
 def add(s): out.append(s)
 def text(x, y, s, size=16, fill=T["fg"], anchor="start", weight=400, family=FONT, extra=""):
     add(f'<text x="{x:.1f}" y="{y:.1f}" font-family=\'{family}\' font-size="{size}" fill="{fill}" '
         f'text-anchor="{anchor}" font-weight="{weight}" {extra}>{s}</text>')
 
-add(f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}">')
-add(f'<rect width="{W}" height="{H}" fill="{T["bg"]}"/>')
 
 # Header
 M = 110
@@ -152,7 +164,7 @@ def era_span(start, end):
     return f"{start_s}–{end_s}"
 
 band_top = top - 110
-for i, (start, end, titles, subs) in enumerate(ERAS):
+for i, (start, end, titles, subs, _) in enumerate(ERAS):
     end = end or AS_OF
     ex = x0 + (frac_year(start) - years[0]) * bw
     ew = x0 + (frac_year(end) + 1 / 365 - years[0]) * bw - ex
@@ -182,17 +194,135 @@ for y in years:
     text(bx + w / 2, base - hp - hu - 10, f"{by_year[y]:,}", 16, T["bright"], "middle", family=MONO)
     text(bx + w / 2, base + 30, f"’{str(y)[2:]}", 18, T["fg"], "middle", family=MONO)
 add(f'<line x1="{x0}" x2="{x1}" y1="{base}" y2="{base}" stroke="{T["muted"]}" stroke-width="1.5"/>')
-text(X(years[-1]) + bw / 2, base + 54, f"through {AS_OF[5:7]}/{AS_OF[8:]}", 14, T["muted"], "middle")
+text(X(years[-1]) + bw / 2, base + 52, f"through {AS_OF[5:7]}/{AS_OF[8:]}", 14, T["muted"], "middle")
 
-ly = base + 100
+# Languages: inverted, smoothed, stacked area hanging below the bars, on the same x axis.
+# Solid = commits measured from git history (fetch_languages.py); hatched = the rest of that
+# month's contributions, split by the era's declared `languages` mix in eras.yaml.
+month_keys = [f"{y}-{m:02d}" for y in years for m in range(1, 13) if f"{y}-{m:02d}" <= AS_OF[:7]]
+contrib_month = {k: 0 for k in month_keys}
+for d, c in DAYS:
+    if d <= AS_OF:
+        contrib_month[d[:7]] += c
+def era_shares(month):
+    for start, end, _, _, shares in ERAS:
+        if start[:7] <= month <= (end or AS_OF)[:7]:
+            return shares
+    return {}
+measured, declared = {}, {}
+for k in month_keys:
+    meas = MEASURED.get(k, {})
+    rest = max(0, contrib_month[k] - sum(meas.values()))
+    measured[k] = meas
+    declared[k] = {l: rest * w for l, w in era_shares(k).items()}
+lang_total = {}
+for k in month_keys:
+    for src in (measured[k], declared[k]):
+        for l, v in src.items():
+            lang_total[l] = lang_total.get(l, 0) + v
+TOP = [l for l, _ in sorted(lang_total.items(), key=lambda x: -x[1]) if l != "Other"][:8]
+order = TOP + (["Other"] if set(lang_total) - set(TOP) else [])
+cycle = iter(T["lang_cycle"])
+lang_color = {l: T["langs"].get(l) or next(cycle, T["langs"]["Other"]) for l in order}
+
+def series(src, lang):
+    vals = [src[k].get(lang, 0) if lang != "Other" else sum(v for l, v in src[k].items() if l not in TOP) for k in month_keys]
+    sigma, r = 2.2, 7  # gaussian smoothing over months
+    wts = [2.718281828 ** (-(j * j) / (2 * sigma * sigma)) for j in range(-r, r + 1)]
+    out_ = []
+    for i in range(len(vals)):
+        acc = norm = 0
+        for j, w in zip(range(-r, r + 1), wts):
+            if 0 <= i + j < len(vals):
+                acc += vals[i + j] * w; norm += w
+        out_.append(acc / norm)
+    return out_
+
+layers = []  # (lang, is_declared, values)
+for l in order:
+    for is_decl, src in ((False, measured), (True, declared)):
+        vals = series(src, l)
+        if max(vals, default=0) > 0.05:
+            layers.append((l, is_decl, vals))
+la_top = base + 70
+la_h = 360
+stack_max = max((sum(v[i] for _, _, v in layers) for i in range(len(month_keys))), default=0)
+if layers and stack_max > 0:
+    # Square-root height so early years stay visible next to the 2026 surge; within each month the
+    # layers keep their true proportions of that month's total.
+    totals = [sum(v[i] for _, _, v in layers) for i in range(len(month_keys))]
+    k_sqrt = la_h / stack_max ** 0.5
+    def thickness(v, i):
+        return v / totals[i] * totals[i] ** 0.5 * k_sqrt if totals[i] > 0 else 0
+    mx = [x0 + (int(k[:4]) - years[0] + (int(k[5:]) - 0.5) / 12) * bw for k in month_keys]
+
+    def curve(ys, reverse=False):
+        pts = list(zip(mx, ys))
+        if reverse:
+            pts = pts[::-1]
+        d = f"L{pts[0][0]:.1f},{pts[0][1]:.1f}"
+        for i in range(len(pts) - 1):  # Catmull-Rom -> cubic Bezier
+            p0, p1, p2 = pts[max(i - 1, 0)], pts[i], pts[i + 1]
+            p3 = pts[min(i + 2, len(pts) - 1)]
+            c1 = (p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6)
+            c2 = (p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6)
+            d += f" C{c1[0]:.1f},{c1[1]:.1f} {c2[0]:.1f},{c2[1]:.1f} {p2[0]:.1f},{p2[1]:.1f}"
+        return d
+
+    add("<defs>")
+    for l in order:
+        c = lang_color[l]
+        add(f'<pattern id="hatch-{order.index(l)}" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)">'
+            f'<rect width="7" height="7" fill="{c}" opacity="0.22"/><line x1="0" y1="0" x2="0" y2="7" stroke="{c}" stroke-width="3"/></pattern>')
+    add("</defs>")
+    # faint gridline at a round per-month value
+    for g in (v for v in (5, 25, 100, 250, 500, 1000) if v <= stack_max):
+        gy = la_top + g ** 0.5 * k_sqrt
+        add(f'<line x1="{x0}" x2="{x1}" y1="{gy:.1f}" y2="{gy:.1f}" stroke="{T["muted"]}" stroke-width="1" stroke-dasharray="2 6" opacity="0.6"/>')
+        text(x0 - 10, gy + 4, f"{g}/mo", 13, T["muted"], "end", family=MONO)
+    upper = [la_top] * len(month_keys)
+    label_at = {}
+    for l, is_decl, vals in layers:
+        lower = [u + thickness(v, i) for i, (u, v) in enumerate(zip(upper, vals))]
+        d = "M" + curve(upper)[1:] + " " + curve(lower, reverse=True) + " Z"
+        fill = f"url(#hatch-{order.index(l)})" if is_decl else lang_color[l]
+        add(f'<path d="{d}" fill="{fill}"/>')
+        for i, (u, lo) in enumerate(zip(upper, lower)):
+            best = label_at.get(l)
+            if x0 + 60 < mx[i] < x1 - 60 and (not best or lo - u > best[0]):
+                label_at[l] = (lo - u, i, u, lo)
+        upper = lower
+    # label each language where its (measured) band is thickest
+    for l, (thick, i, u, lo) in label_at.items():
+        if thick >= 14:
+            text(mx[i], (u + lo) / 2 + 5, l, 14, T["bright"], "middle", weight=700,
+                 extra=f'stroke="{T["bg"]}" stroke-width="3.5" paint-order="stroke"')
+    text(x0, la_top + la_h + 34, "Code commits per month by language · smoothed · height on a square-root scale", 16, T["muted"])
+    la_bottom = la_top + la_h + 34
+else:
+    la_bottom = base + 70
+
+# Legends: bars, then languages
+ly = la_bottom + 56
 add(f'<rect x="{x0}" y="{ly - 14}" width="16" height="16" fill="{T["pub"]}"/>')
 text(x0 + 26, ly, "public repos", 18, T["fg"])
 add(f'<rect x="{x0 + 180}" y="{ly - 14}" width="16" height="16" fill="{T["priv"]}"/>')
 text(x0 + 206, ly, "private repos (counts only)", 18, T["fg"])
 text(x1, ly, "contributions per year", 18, T["muted"], "end")
+if layers:
+    ly += 40
+    lx_ = x0
+    for l in order:
+        add(f'<rect x="{lx_}" y="{ly - 14}" width="16" height="16" rx="3" fill="{lang_color[l]}"/>')
+        text(lx_ + 24, ly, l, 18, T["fg"])
+        lx_ += 24 + len(l) * 10 + 34
+    if any(is_decl for _, is_decl, _ in layers):
+        text(x1, ly, "solid: measured from git history · hatched: estimated from eras.yaml", 16, T["muted"], "end")
+    else:
+        text(x1, ly, "measured from git history", 16, T["muted"], "end")
 
 # Lifetime heatmap: two columns of years, GitHub-style week x weekday grid.
-hm_top = 1290
+hm_top = ly + 130
 text(M, hm_top - 40, "EVERY DAY", 22, T["bright"], weight=600, extra='letter-spacing="3"')
 cell, gap = 10, 2.6
 pitch = cell + gap
@@ -232,6 +362,9 @@ for j, (_, cc) in enumerate(BINS):
 text(lx + 6 * (pitch + 2) + 6, lyy + 10, "more  (0 · 1 · 3 · 6 · 11 · 21+)", 15, T["muted"])
 
 # Footer
+H = hm_top + 10 * block_h + 170
+out.insert(0, f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}">\n'
+              f'<rect width="{W}" height="{H}" fill="{T["bg"]}"/>')
 text(M, H - 70, f"Source: GitHub GraphQL API, fetched {AS_OF}. Private-repo activity is exposed only as daily counts.", 16, T["muted"])
 text(W - M, H - 70, f"github.com/{LOGIN}", 16, T["fg"], "end", family=MONO)
 add("</svg>")
