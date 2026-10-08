@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Render the all-time GitHub poster (yearly skyline + lifetime heatmap) as SVG.
 
-Usage: make_poster.py [tokyonight|solarized]   (reads data/contributions.json, writes output/)
+Usage: make_poster.py [tokyonight|solarized] [--eras eras.yaml]
+Reads data/contributions.json and the eras file, writes output/.
 """
-import json, sys, datetime as dt
+import argparse, calendar, json, sys, datetime as dt
 from pathlib import Path
 
 HERE = Path(__file__).parent
@@ -11,19 +12,6 @@ DATA = json.loads((HERE / "data" / "contributions.json").read_text())
 LOGIN, AS_OF, DAYS = DATA["login"], DATA["as_of"], DATA["days"]
 # Private (restricted) contributions are only available as per-year counts.
 PRIV = {int(y): n for y, n in DATA["private_by_year"].items()}
-
-# Eras: (start date, end date inclusive, title lines, subtitle lines).
-# Years without a known month are taken as whole years.
-ERAS = [
-    ("2008-01-01", "2010-10-31", ["Causes"], []),
-    ("2010-11-01", "2011-12-31", ["Gowalla"], []),
-    ("2012-01-01", "2014-04-30", ["Return Path", "Uncommon"], ["Austin.rb"]),
-    ("2014-05-01", "2014-11-30", ["Last Guide"], []),
-    ("2015-01-01", "2020-08-31", ["Under Armour"], ["Engineer career growth"]),
-    ("2020-09-01", "2023-07-31", ["SailPoint"], []),
-    ("2023-08-01", "2023-12-31", ["Praxis"], []),
-    ("2024-01-01", None, ["OMC"], ["Agents"]),
-]
 
 THEMES = {
     "solarized": dict(bg="#002b36", band="#073642", muted="#586e75", fg="#839496", bright="#93a1a1",
@@ -34,8 +22,70 @@ THEMES = {
                        accent="#ff007c", pub="#ff007c", priv="#9d7cd8", sub="#bb9af7",
                        bins=["#292e42", "#3b3566", "#5d4794", "#9d7cd8", "#c879d6", "#ff007c"]),
 }
-THEME = sys.argv[1] if len(sys.argv) > 1 else "tokyonight"
+args = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+args.add_argument("theme", nargs="?", default="tokyonight", choices=THEMES)
+args.add_argument("--eras", type=Path, default=HERE / "eras.yaml", help="eras file (default: eras.yaml)")
+args = args.parse_args()
+THEME = args.theme
 T = THEMES[THEME]
+
+
+def parse_when(value, is_end):
+    """YYYY, YYYY-MM, or YYYY-MM-DD (YAML may hand us an int or a date) -> ISO date string."""
+    s = value.isoformat() if isinstance(value, dt.date) else str(value)
+    parts = s.split("-")
+    try:
+        y, m, d = int(parts[0]), int(parts[1]) if len(parts) > 1 else None, int(parts[2]) if len(parts) > 2 else None
+        if len(parts) > 3 or len(parts[0]) != 4:
+            raise ValueError
+        if m is None:
+            m, d = (12, 31) if is_end else (1, 1)
+        elif d is None:
+            d = calendar.monthrange(y, m)[1] if is_end else 1
+        return dt.date(y, m, d).isoformat()
+    except (ValueError, IndexError):
+        raise ValueError(f"bad date {value!r}; use YYYY, YYYY-MM, or YYYY-MM-DD") from None
+
+
+def as_lines(value):
+    if value is None:
+        return []
+    return [str(v) for v in value] if isinstance(value, list) else [str(value)]
+
+
+def load_eras(path):
+    """Eras as (start, end or None, title lines, subtitle lines), validated to be ordered and non-overlapping."""
+    if not path.exists():
+        return []
+    try:
+        import yaml
+    except ImportError:
+        sys.exit(f"make_poster.py: reading {path.name} needs PyYAML: pip install -r requirements.txt")
+    doc = yaml.safe_load(path.read_text()) or {}
+    eras = []
+    for n, e in enumerate(doc.get("eras") or [], 1):
+        where = f"{path.name}: era {n}"
+        try:
+            if not isinstance(e, dict) or not e.get("title") or "start" not in e:
+                raise ValueError("needs at least a title and a start")
+            start = parse_when(e["start"], is_end=False)
+            end = parse_when(e["end"], is_end=True) if e.get("end") is not None else None
+        except ValueError as err:
+            sys.exit(f"{where}: {err}")
+        where += f" ({as_lines(e['title'])[0]})"
+        if end and end < start:
+            sys.exit(f"{where}: ends before it starts")
+        if eras:
+            prev_end = eras[-1][1]
+            if prev_end is None:
+                sys.exit(f"{where}: only the last era can leave out an end date")
+            if start <= prev_end:
+                sys.exit(f"{where}: starts on or before the previous era ends ({prev_end}); eras must be in order and not overlap")
+        eras.append((start, end, as_lines(e["title"]), as_lines(e.get("subtitle"))))
+    return eras
+
+
+ERAS = load_eras(args.eras)
 FONT = 'system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
 MONO = 'ui-monospace, "SF Mono", Menlo, monospace'
 
