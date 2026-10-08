@@ -17,24 +17,29 @@ eras:
   - title: Causes
     start: 2008
     end: 2010-10
+    languages: {Ruby: 60, JavaScript: 25, CSS: 15}
 
   - title: Gowalla
     start: 2010-11
     end: 2011
+    languages: {Ruby: 80, JavaScript: 20}
 
   - title: [Return Path, Uncommon]
     subtitle: Austin.rb
     start: 2012
     end: 2014-04
+    languages: {Ruby: 60, CoffeeScript: 25, CSS: 15}
 
   - title: Last Guide
     start: 2014-05
     end: 2014-11
+    languages: {Ruby: 100}
 
   - title: Under Armour
     subtitle: Engineer career growth
     start: 2015
     end: 2020-08
+    languages: {Python: 50, Ruby: 30, JavaScript: 20}
 
   - title: SailPoint
     start: 2020-09

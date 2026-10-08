@@ -297,7 +297,7 @@ if layers and stack_max > 0:
         if thick >= 14:
             text(mx[i], (u + lo) / 2 + 5, l, 14, T["bright"], "middle", weight=700,
                  extra=f'stroke="{T["bg"]}" stroke-width="3.5" paint-order="stroke"')
-    text(x0, la_top + la_h + 34, "Code commits per month by language · smoothed · height on a square-root scale", 16, T["muted"])
+    text(x0, la_top + la_h + 34, "Code activity per month by language · smoothed · height on a square-root scale", 16, T["muted"])
     la_bottom = la_top + la_h + 34
 else:
     la_bottom = base + 70
