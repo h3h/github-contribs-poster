@@ -36,81 +36,119 @@
 <text x="1454.5" y="420.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="18" fill="#93a1a1" text-anchor="start" font-weight="600" letter-spacing="2">OMC</text>
 <text x="1454.5" y="443.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="16" fill="#2aa198" text-anchor="start" font-weight="400" >Agents</text>
 <text x="1454.5" y="467.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="15" fill="#586e75" text-anchor="start" font-weight="400" >2024–26 · 4,428</text>
+<g>
 <rect x="123.3" y="1055.6" width="56.5" height="4.4" fill="#268bd2"/>
 <rect x="123.3" y="1044.6" width="56.5" height="11.0" fill="#b58900"/>
 <text x="151.6" y="1034.6" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="16" fill="#93a1a1" text-anchor="middle" font-weight="400" >81</text>
+</g>
 <text x="151.6" y="1090.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="18" fill="#839496" text-anchor="middle" font-weight="400" >’08</text>
+<g>
 <rect x="206.5" y="1042.5" width="56.5" height="17.5" fill="#268bd2"/>
 <rect x="206.5" y="1037.9" width="56.5" height="4.6" fill="#b58900"/>
 <text x="234.7" y="1027.9" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="16" fill="#93a1a1" text-anchor="middle" font-weight="400" >116</text>
+</g>
 <text x="234.7" y="1090.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="18" fill="#839496" text-anchor="middle" font-weight="400" >’09</text>
+<g>
 <rect x="289.6" y="1046.3" width="56.5" height="13.7" fill="#268bd2"/>
 <rect x="289.6" y="1021.0" width="56.5" height="25.3" fill="#b58900"/>
 <text x="317.9" y="1011.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="16" fill="#93a1a1" text-anchor="middle" font-weight="400" >205</text>
+</g>
 <text x="317.9" y="1090.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="18" fill="#839496" text-anchor="middle" font-weight="400" >’10</text>
+<g>
 <rect x="372.8" y="994.7" width="56.5" height="65.3" fill="#268bd2"/>
 <rect x="372.8" y="982.0" width="56.5" height="12.7" fill="#b58900"/>
 <text x="401.1" y="972.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="16" fill="#93a1a1" text-anchor="middle" font-weight="400" >410</text>
+</g>
 <text x="401.1" y="1090.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="18" fill="#839496" text-anchor="middle" font-weight="400" >’11</text>
+<g>
 <rect x="455.9" y="1032.2" width="56.5" height="27.8" fill="#268bd2"/>
 <rect x="455.9" y="1028.8" width="56.5" height="3.4" fill="#b58900"/>
 <text x="484.2" y="1018.8" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="16" fill="#93a1a1" text-anchor="middle" font-weight="400" >164</text>
+</g>
 <text x="484.2" y="1090.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="18" fill="#839496" text-anchor="middle" font-weight="400" >’12</text>
+<g>
 <rect x="539.1" y="975.9" width="56.5" height="84.1" fill="#268bd2"/>
 <rect x="539.1" y="957.8" width="56.5" height="18.1" fill="#b58900"/>
 <text x="567.4" y="947.8" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="16" fill="#93a1a1" text-anchor="middle" font-weight="400" >537</text>
+</g>
 <text x="567.4" y="1090.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="18" fill="#839496" text-anchor="middle" font-weight="400" >’13</text>
+<g>
 <rect x="622.3" y="937.5" width="56.5" height="122.5" fill="#268bd2"/>
 <rect x="622.3" y="931.8" width="56.5" height="5.7" fill="#b58900"/>
 <text x="650.5" y="921.8" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="16" fill="#93a1a1" text-anchor="middle" font-weight="400" >674</text>
+</g>
 <text x="650.5" y="1090.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="18" fill="#839496" text-anchor="middle" font-weight="400" >’14</text>
+<g>
 <rect x="705.4" y="1005.2" width="56.5" height="54.8" fill="#268bd2"/>
 <rect x="705.4" y="1003.3" width="56.5" height="1.9" fill="#b58900"/>
 <text x="733.7" y="993.3" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="16" fill="#93a1a1" text-anchor="middle" font-weight="400" >298</text>
+</g>
 <text x="733.7" y="1090.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="18" fill="#839496" text-anchor="middle" font-weight="400" >’15</text>
+<g>
 <rect x="788.6" y="1044.8" width="56.5" height="15.2" fill="#268bd2"/>
 <rect x="788.6" y="1040.0" width="56.5" height="4.8" fill="#b58900"/>
 <text x="816.8" y="1030.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="16" fill="#93a1a1" text-anchor="middle" font-weight="400" >105</text>
+</g>
 <text x="816.8" y="1090.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="18" fill="#839496" text-anchor="middle" font-weight="400" >’16</text>
+<g>
 <rect x="871.7" y="1055.1" width="56.5" height="4.9" fill="#268bd2"/>
 <rect x="871.7" y="1038.7" width="56.5" height="16.4" fill="#b58900"/>
 <text x="900.0" y="1028.7" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="16" fill="#93a1a1" text-anchor="middle" font-weight="400" >112</text>
+</g>
 <text x="900.0" y="1090.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="18" fill="#839496" text-anchor="middle" font-weight="400" >’17</text>
+<g>
 <rect x="954.9" y="1057.7" width="56.5" height="2.3" fill="#268bd2"/>
 <rect x="954.9" y="1046.3" width="56.5" height="11.4" fill="#b58900"/>
 <text x="983.2" y="1036.3" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="16" fill="#93a1a1" text-anchor="middle" font-weight="400" >72</text>
+</g>
 <text x="983.2" y="1090.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="18" fill="#839496" text-anchor="middle" font-weight="400" >’18</text>
+<g>
 <rect x="1038.0" y="1060.0" width="56.5" height="0.0" fill="#268bd2"/>
 <rect x="1038.0" y="1059.8" width="56.5" height="0.2" fill="#b58900"/>
 <text x="1066.3" y="1049.8" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="16" fill="#93a1a1" text-anchor="middle" font-weight="400" >1</text>
+</g>
 <text x="1066.3" y="1090.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="18" fill="#839496" text-anchor="middle" font-weight="400" >’19</text>
+<g>
 <rect x="1121.2" y="1059.8" width="56.5" height="0.2" fill="#268bd2"/>
 <rect x="1121.2" y="1039.5" width="56.5" height="20.4" fill="#b58900"/>
 <text x="1149.5" y="1029.5" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="16" fill="#93a1a1" text-anchor="middle" font-weight="400" >108</text>
+</g>
 <text x="1149.5" y="1090.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="18" fill="#839496" text-anchor="middle" font-weight="400" >’20</text>
+<g>
 <rect x="1204.4" y="1059.6" width="56.5" height="0.4" fill="#268bd2"/>
 <rect x="1204.4" y="1052.6" width="56.5" height="7.0" fill="#b58900"/>
 <text x="1232.6" y="1042.6" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="16" fill="#93a1a1" text-anchor="middle" font-weight="400" >39</text>
+</g>
 <text x="1232.6" y="1090.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="18" fill="#839496" text-anchor="middle" font-weight="400" >’21</text>
+<g>
 <rect x="1287.5" y="1058.7" width="56.5" height="1.3" fill="#268bd2"/>
 <rect x="1287.5" y="1057.0" width="56.5" height="1.7" fill="#b58900"/>
 <text x="1315.8" y="1047.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="16" fill="#93a1a1" text-anchor="middle" font-weight="400" >16</text>
+</g>
 <text x="1315.8" y="1090.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="18" fill="#839496" text-anchor="middle" font-weight="400" >’22</text>
+<g>
 <rect x="1370.7" y="1056.8" width="56.5" height="3.2" fill="#268bd2"/>
 <rect x="1370.7" y="1036.6" width="56.5" height="20.2" fill="#b58900"/>
 <text x="1398.9" y="1026.6" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="16" fill="#93a1a1" text-anchor="middle" font-weight="400" >123</text>
+</g>
 <text x="1398.9" y="1090.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="18" fill="#839496" text-anchor="middle" font-weight="400" >’23</text>
+<g>
 <rect x="1453.8" y="940.5" width="56.5" height="119.5" fill="#268bd2"/>
 <rect x="1453.8" y="934.6" width="56.5" height="5.9" fill="#b58900"/>
 <text x="1482.1" y="924.6" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="16" fill="#93a1a1" text-anchor="middle" font-weight="400" >659</text>
+</g>
 <text x="1482.1" y="1090.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="18" fill="#839496" text-anchor="middle" font-weight="400" >’24</text>
+<g>
 <rect x="1537.0" y="854.9" width="56.5" height="205.1" fill="#268bd2"/>
 <rect x="1537.0" y="842.9" width="56.5" height="12.0" fill="#b58900"/>
 <text x="1565.3" y="832.9" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="16" fill="#93a1a1" text-anchor="middle" font-weight="400" >1,141</text>
+</g>
 <text x="1565.3" y="1090.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="18" fill="#839496" text-anchor="middle" font-weight="400" >’25</text>
+<g>
 <rect x="1620.1" y="596.3" width="56.5" height="463.7" fill="#268bd2"/>
 <rect x="1620.1" y="560.0" width="56.5" height="36.3" fill="#b58900"/>
 <text x="1648.4" y="550.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="16" fill="#93a1a1" text-anchor="middle" font-weight="400" >2,628</text>
+</g>
 <text x="1648.4" y="1090.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="18" fill="#839496" text-anchor="middle" font-weight="400" >’26</text>
 <line x1="110" x2="1690" y1="1060" y2="1060" stroke="#586e75" stroke-width="1.5"/>
 <text x="1648.4" y="1112.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="14" fill="#586e75" text-anchor="middle" font-weight="400" >through 10/08</text>
@@ -153,30 +191,54 @@
 <rect x="1700" y="819.1697108066971" width="12" height="12" fill="#268bd2"/>
 <text x="1718.0" y="830.2" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="15" fill="#839496" text-anchor="start" font-weight="400" >private</text>
 <text x="1718.0" y="847.2" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="12" fill="#586e75" text-anchor="start" font-weight="400" >counts only</text>
+<g>
 <rect x="110" y="1550" width="16" height="16" rx="3" fill="#dc322f"/>
 <text x="134.0" y="1564.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="18" fill="#839496" text-anchor="start" font-weight="400" >Ruby</text>
+</g>
+<g>
 <rect x="208" y="1550" width="16" height="16" rx="3" fill="#859900"/>
 <text x="232.0" y="1564.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="18" fill="#839496" text-anchor="start" font-weight="400" >Python</text>
+</g>
+<g>
 <rect x="326" y="1550" width="16" height="16" rx="3" fill="#b58900"/>
 <text x="350.0" y="1564.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="18" fill="#839496" text-anchor="start" font-weight="400" >JavaScript</text>
+</g>
+<g>
 <rect x="484" y="1550" width="16" height="16" rx="3" fill="#d33682"/>
 <text x="508.0" y="1564.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="18" fill="#839496" text-anchor="start" font-weight="400" >CSS</text>
+</g>
+<g>
 <rect x="572" y="1550" width="16" height="16" rx="3" fill="#cb4b16"/>
 <text x="596.0" y="1564.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="18" fill="#839496" text-anchor="start" font-weight="400" >HTML</text>
+</g>
+<g>
 <rect x="670" y="1550" width="16" height="16" rx="3" fill="#93a1a1"/>
 <text x="694.0" y="1564.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="18" fill="#839496" text-anchor="start" font-weight="400" >CoffeeScript</text>
+</g>
+<g>
 <rect x="848" y="1550" width="16" height="16" rx="3" fill="#6c71c4"/>
 <text x="872.0" y="1564.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="18" fill="#839496" text-anchor="start" font-weight="400" >Nix</text>
+</g>
+<g>
 <rect x="936" y="1550" width="16" height="16" rx="3" fill="#eee8d5"/>
 <text x="960.0" y="1564.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="18" fill="#839496" text-anchor="start" font-weight="400" >Java</text>
+</g>
+<g>
 <rect x="1034" y="1550" width="16" height="16" rx="3" fill="#2aa198"/>
 <text x="1058.0" y="1564.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="18" fill="#839496" text-anchor="start" font-weight="400" >Shell</text>
+</g>
+<g>
 <rect x="1142" y="1550" width="16" height="16" rx="3" fill="#657b83"/>
 <text x="1166.0" y="1564.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="18" fill="#839496" text-anchor="start" font-weight="400" >Lua</text>
+</g>
+<g>
 <rect x="1230" y="1550" width="16" height="16" rx="3" fill="#268bd2"/>
 <text x="1254.0" y="1564.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="18" fill="#839496" text-anchor="start" font-weight="400" >TypeScript</text>
+</g>
+<g>
 <rect x="1388" y="1550" width="16" height="16" rx="3" fill="#586e75"/>
 <text x="1412.0" y="1564.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="18" fill="#839496" text-anchor="start" font-weight="400" >Other</text>
+</g>
 <text x="110.0" y="1598.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="16" fill="#586e75" text-anchor="start" font-weight="400" >bright: measured from git history · muted: estimated from eras.yaml</text>
 <text x="110.0" y="1688.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="22" fill="#93a1a1" text-anchor="start" font-weight="600" letter-spacing="3">EVERY DAY</text>
 <text x="164.0" y="1778.1" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="18" fill="#839496" text-anchor="end" font-weight="400" >2008</text>

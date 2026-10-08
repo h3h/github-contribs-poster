@@ -4,7 +4,7 @@
 Usage: make_poster.py [tokyonight|solarized] [--eras eras.yaml]
 Reads data/contributions.json and the eras file, writes output/.
 """
-import argparse, calendar, colorsys, json, sys, datetime as dt
+import argparse, calendar, colorsys, html, json, sys, datetime as dt
 from pathlib import Path
 
 HERE = Path(__file__).parent
@@ -39,6 +39,9 @@ args.add_argument("theme", nargs="?", default="tokyonight", choices=THEMES)
 args.add_argument("--eras", type=Path, default=HERE / "eras.yaml", help="eras file (default: eras.yaml)")
 args.add_argument("--lang-scale", choices=["sqrt", "log", "linear"], default="sqrt",
                   help="height scale for the language chart (default: sqrt)")
+args.add_argument("--annotate", action="store_true",
+                  help="tag chart elements with data-* attributes for make_page.py's hover effects")
+args.add_argument("--out", type=Path, help="output path (default: output/<login>-github-all-time-<theme>.svg)")
 args = args.parse_args()
 THEME = args.theme
 T = THEMES[THEME]
@@ -127,6 +130,11 @@ def streak():
 W = 1800
 out = []
 def add(s): out.append(s)
+def tag(cls, **data):
+    """class + data-* attributes for interactive pages; nothing for the static poster."""
+    if not args.annotate:
+        return ""
+    return f' class="{cls}"' + "".join(f' data-{k}="{html.escape(str(v), quote=True)}"' for k, v in data.items())
 def text(x, y, s, size=16, fill=T["fg"], anchor="start", weight=400, family=FONT, extra=""):
     add(f'<text x="{x:.1f}" y="{y:.1f}" font-family=\'{family}\' font-size="{size}" fill="{fill}" '
         f'text-anchor="{anchor}" font-weight="{weight}" {extra}>{s}</text>')
@@ -168,14 +176,17 @@ def era_span(start, end):
     return f"{start_s}–{end_s}"
 
 band_top = top - 110
-for i, (start, end, titles, subs, _) in enumerate(ERAS):
+for i, (start, end, titles, subs, shares) in enumerate(ERAS):
     end = end or AS_OF
     ex = x0 + (frac_year(start) - years[0]) * bw
     ew = x0 + (frac_year(end) + 1 / 365 - years[0]) * bw - ex
-    if i % 2 == 0:
-        add(f'<rect x="{ex:.1f}" y="{band_top}" width="{ew:.1f}" height="{base - band_top}" fill="{T["band"]}" opacity="0.55"/>')
     era_total = sum(c for d, c in DAYS if start <= d <= end)
     meta = f"{era_span(start, end)} · {era_total:,}"
+    if i % 2 == 0 or args.annotate:
+        mix = " · ".join(f"{l} {round(v * 100)}%" for l, v in sorted(shares.items(), key=lambda x: -x[1]))
+        add(f'<rect x="{ex:.1f}" y="{band_top}" width="{ew:.1f}" height="{base - band_top}" fill="{T["band"]}" '
+            f'opacity="{0.55 if i % 2 == 0 else 0}"'
+            f'{tag("era", title=" · ".join(titles), sub=" · ".join(subs), span=era_span(start, end), total=era_total, mix=mix)}/>')
     if ew < 110:  # too narrow for stacked labels: run them vertically down the band
         ty = band_top + 16
         for tx, s_, size, fill, fam, w8 in [(ex + ew / 2 - 15, " · ".join(t.upper() for t in titles), 16, T["bright"], FONT, 600),
@@ -193,9 +204,13 @@ for y in years:
     pv = PRIV[y]; pu = by_year[y] - pv
     bx = X(y) + bw * 0.16; w = bw * 0.68
     hp, hu = pv * scale, pu * scale
+    add(f'<g{tag("bar", year=y, total=by_year[y], pub=pu, priv=pv)}>')
     add(f'<rect x="{bx:.1f}" y="{base - hp:.1f}" width="{w:.1f}" height="{hp:.1f}" fill="{T["priv"]}"/>')
     add(f'<rect x="{bx:.1f}" y="{base - hp - hu:.1f}" width="{w:.1f}" height="{hu:.1f}" fill="{T["pub"]}"/>')
+    if args.annotate:  # a hover target the full height of the column, so short bars are easy to hit
+        add(f'<rect x="{X(y):.1f}" y="{top - 20}" width="{bw:.1f}" height="{base - top + 20}" fill="transparent"/>')
     text(bx + w / 2, base - hp - hu - 10, f"{by_year[y]:,}", 16, T["bright"], "middle", family=MONO)
+    add("</g>")
     text(bx + w / 2, base + 30, f"’{str(y)[2:]}", 18, T["fg"], "middle", family=MONO)
 add(f'<line x1="{x0}" x2="{x1}" y1="{base}" y2="{base}" stroke="{T["muted"]}" stroke-width="1.5"/>')
 text(X(years[-1]) + bw / 2, base + 52, f"through {AS_OF[5:7]}/{AS_OF[8:]}", 14, T["muted"], "middle")
@@ -230,8 +245,11 @@ order = TOP + (["Other"] if set(lang_total) - set(TOP) else [])
 cycle = iter(T["lang_cycle"])
 lang_color = {l: T["langs"].get(l) or next(cycle, T["langs"]["Other"]) for l in order}
 
+def raw(src, lang):
+    return [src[k].get(lang, 0) if lang != "Other" else sum(v for l, v in src[k].items() if l not in TOP) for k in month_keys]
+
 def series(src, lang):
-    vals = [src[k].get(lang, 0) if lang != "Other" else sum(v for l, v in src[k].items() if l not in TOP) for k in month_keys]
+    vals = raw(src, lang)
     sigma, r = 2.2, 7  # gaussian smoothing over months
     wts = [2.718281828 ** (-(j * j) / (2 * sigma * sigma)) for j in range(-r, r + 1)]
     out_ = []
@@ -248,16 +266,16 @@ for l in order:
     for is_decl, src in ((False, measured), (True, declared)):
         vals = series(src, l)
         if max(vals, default=0) > 0.05:
-            layers.append((l, is_decl, vals))
+            layers.append((l, is_decl, vals, raw(src, l)))
 la_top = base + 70
 la_h = 360
-stack_max = max((sum(v[i] for _, _, v in layers) for i in range(len(month_keys))), default=0)
+stack_max = max((sum(v[i] for _, _, v, _ in layers) for i in range(len(month_keys))), default=0)
 if layers and stack_max > 0:
     # A compressed height (sqrt or log) keeps early years visible next to the 2026 surge; within
     # each month the layers keep their true proportions of that month's total.
     import math
     hscale = {"sqrt": lambda t: t ** 0.5, "log": lambda t: math.log1p(t), "linear": lambda t: t}[args.lang_scale]
-    totals = [sum(v[i] for _, _, v in layers) for i in range(len(month_keys))]
+    totals = [sum(v[i] for _, _, v, _ in layers) for i in range(len(month_keys))]
     k_h = la_h / hscale(stack_max)
     def thickness(v, i):
         return v / totals[i] * hscale(totals[i]) * k_h if totals[i] > 0 else 0
@@ -291,16 +309,18 @@ if layers and stack_max > 0:
         text(x0 - 10, gy + 4, f"{g}/mo", 13, T["muted"], "end", family=MONO)
     upper = [la_top] * len(month_keys)
     label_at = {}
-    for l, is_decl, vals in layers:
+    for l, is_decl, vals, raw_vals in layers:
         lower = [u + thickness(v, i) for i, (u, v) in enumerate(zip(upper, vals))]
         d = "M" + curve(upper)[1:] + " " + curve(lower, reverse=True) + " Z"
+        meta_ = tag("layer", lang=l, kind="estimated" if is_decl else "measured", color=lang_color[l],
+                    total=round(sum(raw_vals)), vals=json.dumps([round(v, 1) for v in raw_vals], separators=(",", ":")))
         if is_decl:  # estimated: muted fill, slightly more saturated outline
             c = lang_color[l]
             muted = T.get("langs_muted", {}).get(l)
             fill, edge = (muted, blend(c, muted, 0.5)) if muted else (desaturate(c, 0.3), desaturate(c, 0.6))
-            add(f'<path d="{d}" fill="{fill}" stroke="{edge}" stroke-width="1.5" stroke-linejoin="round"/>')
+            add(f'<path d="{d}" fill="{fill}" stroke="{edge}" stroke-width="1.5" stroke-linejoin="round"{meta_}/>')
         else:
-            add(f'<path d="{d}" fill="{lang_color[l]}"/>')
+            add(f'<path d="{d}" fill="{lang_color[l]}"{meta_}/>')
         for i, (u, lo) in enumerate(zip(upper, lower)):
             best = label_at.get(l)
             if x0 + 60 < mx[i] < x1 - 60 and (not best or lo - u > best[0]):
@@ -338,11 +358,15 @@ if layers:
         item_w = 24 + len(l) * 10 + 34
         if lx_ + item_w > x1:
             lx_, ly = x0, ly + 34
+        add(f'<g{tag("key", lang=l)}>')
         add(f'<rect x="{lx_}" y="{ly - 14}" width="16" height="16" rx="3" fill="{lang_color[l]}"/>')
         text(lx_ + 24, ly, l, 18, T["fg"])
+        if args.annotate:
+            add(f'<rect x="{lx_ - 4}" y="{ly - 20}" width="{item_w - 22}" height="28" fill="transparent"/>')
+        add("</g>")
         lx_ += item_w
     ly += 34
-    if any(is_decl for _, is_decl, _ in layers):
+    if any(is_decl for _, is_decl, _, _ in layers):
         text(x0, ly, "bright: measured from git history · muted: estimated from eras.yaml", 16, T["muted"])
     else:
         text(x0, ly, "measured from git history", 16, T["muted"])
@@ -377,7 +401,8 @@ for i, y in enumerate(years):
         if key > AS_OF: break
         wk = (d - start).days // 7
         dow = (d.weekday() + 1) % 7
-        add(f'<rect x="{cx + wk * pitch:.1f}" y="{cy + dow * pitch:.1f}" width="{cell}" height="{cell}" rx="2" fill="{color(by_day.get(key, 0))}"/>')
+        add(f'<rect x="{cx + wk * pitch:.1f}" y="{cy + dow * pitch:.1f}" width="{cell}" height="{cell}" rx="2" '
+            f'fill="{color(by_day.get(key, 0))}"{tag("day", d=key, c=by_day.get(key, 0))}/>')
         d += dt.timedelta(days=1)
 
 # Heatmap legend, bottom right of second column
@@ -389,13 +414,15 @@ text(lx + 6 * (pitch + 2) + 6, lyy + 10, "more  (0 · 1 · 3 · 6 · 11 · 21+)"
 
 # Footer
 H = hm_top + 10 * block_h + 170
-out.insert(0, f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}">\n'
+chart_meta = tag("poster", login=LOGIN, theme=THEME, x0=x0, bw=f"{bw:.3f}", y0=years[0], months=len(month_keys),
+                 latop=la_top, lah=la_h, bg=T["bg"], fg=T["fg"], bright=T["bright"], muted=T["muted"], band=T["band"])
+out.insert(0, f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}"{chart_meta}>\n'
               f'<rect width="{W}" height="{H}" fill="{T["bg"]}"/>')
 text(M, H - 70, f"Source: GitHub GraphQL API, fetched {AS_OF}. Private-repo activity is exposed only as daily counts.", 16, T["muted"])
 text(W - M, H - 70, f"github.com/{LOGIN}", 16, T["fg"], "end", family=MONO)
 add("</svg>")
 
-svg = HERE / "output" / f"{LOGIN}-github-all-time-{THEME}.svg"
+svg = args.out or HERE / "output" / f"{LOGIN}-github-all-time-{THEME}.svg"
 svg.parent.mkdir(exist_ok=True)
 svg.write_text("\n".join(out))
 print(f"wrote {svg} ({total:,} contributions)")
