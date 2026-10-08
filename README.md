@@ -12,7 +12,7 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt   # PyYAML, f
 ./render.sh               # writes output/*.svg and, with rsvg-convert, output/*.png
 ```
 
-- `python3 make_poster.py solarized` renders a single theme (`tokyonight` is the default).
+- `.venv/bin/python3 make_poster.py solarized` renders a single theme (`tokyonight` is the default).
 - Career eras live in [`eras.yaml`](eras.yaml): a title, an optional subtitle, and start/end dates as `YYYY`, `YYYY-MM`, or `YYYY-MM-DD`. Replace them with your own, or delete them for a poster with no eras. `--eras path/to/file.yaml` points at a different file.
 - No `rsvg-convert`? Run `nix shell nixpkgs#librsvg -c ./render.sh`.
 
