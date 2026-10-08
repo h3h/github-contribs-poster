@@ -27,9 +27,11 @@ THEMES = {
     "tokyonight": dict(bg="#1a1b26", band="#24283b", muted="#565f89", fg="#a9b1d6", bright="#c0caf5",
                        accent="#ff007c", pub="#ff007c", priv="#9d7cd8", sub="#bb9af7",
                        bins=["#292e42", "#3b3566", "#5d4794", "#9d7cd8", "#c879d6", "#ff007c"],
-                       langs={"Ruby": "#ff007c", "JavaScript": "#00a2ff", "TypeScript": "#00e5ff", "Python": "#3d5afe",
+                       langs={"Ruby": "#ffffff", "JavaScript": "#00a2ff", "TypeScript": "#00e5ff", "Python": "#3d5afe",
                               "Shell": "#7c4dff", "Nix": "#7aa2f7", "HTML": "#ff9e64", "CSS": "#c13cff",
-                              "CoffeeScript": "#c0caf5", "Java": "#bb9af7", "Other": "#565f89"},
+                              "CoffeeScript": "#ff007c", "Java": "#bb9af7", "Other": "#565f89"},
+                       # Desaturating does nothing to white, so estimated Ruby gets an explicit muted color.
+                       langs_muted={"Ruby": "#a9b1d6"},
                        lang_cycle=["#f7768e", "#ff6ec7", "#b4f9f8"]),
 }
 args = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -278,6 +280,9 @@ if layers and stack_max > 0:
         r, g, b = (int(hex_color[i:i + 2], 16) / 255 for i in (1, 3, 5))
         h, l, s_ = colorsys.rgb_to_hls(r, g, b)
         return "#" + "".join(f"{round(c * 255):02x}" for c in colorsys.hls_to_rgb(h, l, s_ * keep))
+
+    def blend(a, b, t):
+        return "#" + "".join(f"{round(int(a[i:i + 2], 16) * (1 - t) + int(b[i:i + 2], 16) * t):02x}" for i in (1, 3, 5))
     # faint gridline at a round per-month value
     grid = {"sqrt": (5, 25, 100, 250, 500, 1000), "log": (1, 5, 25, 100, 500), "linear": (50, 100, 150, 200, 250)}
     for g in (v for v in grid[args.lang_scale] if v <= stack_max):
@@ -291,7 +296,9 @@ if layers and stack_max > 0:
         d = "M" + curve(upper)[1:] + " " + curve(lower, reverse=True) + " Z"
         if is_decl:  # estimated: muted fill, slightly more saturated outline
             c = lang_color[l]
-            add(f'<path d="{d}" fill="{desaturate(c, 0.3)}" stroke="{desaturate(c, 0.6)}" stroke-width="1.5" stroke-linejoin="round"/>')
+            muted = T.get("langs_muted", {}).get(l)
+            fill, edge = (muted, blend(c, muted, 0.5)) if muted else (desaturate(c, 0.3), desaturate(c, 0.6))
+            add(f'<path d="{d}" fill="{fill}" stroke="{edge}" stroke-width="1.5" stroke-linejoin="round"/>')
         else:
             add(f'<path d="{d}" fill="{lang_color[l]}"/>')
         for i, (u, lo) in enumerate(zip(upper, lower)):
