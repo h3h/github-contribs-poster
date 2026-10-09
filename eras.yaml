@@ -33,6 +33,7 @@ eras:
     languages: {Ruby: 60, CoffeeScript: 25, CSS: 15}
 
   - title: Last Guide
+    subtitle: Head of Engineering
     start: 2014-05
     end: 2014-11
     languages: {Ruby: 100}
