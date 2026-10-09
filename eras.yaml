@@ -15,17 +15,19 @@
 
 eras:
   - title: Causes
+    subtitle: Lead Developer
     start: 2008
     end: 2010-10
     languages: {Ruby: 60, JavaScript: 25, CSS: 15}
 
   - title: Gowalla
+    subtitle: Lead Developer
     start: 2010-11
     end: 2011
     languages: {Ruby: 80, JavaScript: 20}
 
   - title: [Return Path, Uncommon]
-    subtitle: Austin.rb
+    subtitle: Director, Engineering
     start: 2012
     end: 2014-04
     languages: {Ruby: 60, CoffeeScript: 25, CSS: 15}
@@ -36,12 +38,13 @@ eras:
     languages: {Ruby: 100}
 
   - title: Under Armour
-    subtitle: Engineer career growth
+    subtitle: Manager–Director, Engineering
     start: 2015
     end: 2020-08
     languages: {Python: 50, Ruby: 30, JavaScript: 20}
 
   - title: SailPoint
+    subtitle: Director–Sr. Director, Engineering
     start: 2020-09
     end: 2023-07
 
@@ -50,5 +53,5 @@ eras:
     end: 2023-12
 
   - title: OMC
-    subtitle: Agents
+    subtitle: COO & Head of Product/Engineering
     start: 2024

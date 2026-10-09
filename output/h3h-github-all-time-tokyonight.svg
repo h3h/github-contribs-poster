@@ -14,28 +14,32 @@
 <text x="1390.0" y="282.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="18" fill="#565f89" text-anchor="start" font-weight="400" >in private repos</text>
 <rect x="110.0" y="390" width="235.6" height="670" fill="#24283b" opacity="0.55"/>
 <text x="124.0" y="420.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="18" fill="#c0caf5" text-anchor="start" font-weight="600" letter-spacing="2">CAUSES</text>
-<text x="124.0" y="445.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="15" fill="#565f89" text-anchor="start" font-weight="400" >2008–Oct ’10 · 351</text>
+<text x="124.0" y="443.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="16" fill="#bb9af7" text-anchor="start" font-weight="400" >Lead Developer</text>
+<text x="124.0" y="467.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="15" fill="#565f89" text-anchor="start" font-weight="400" >2008–Oct ’10 · 351</text>
 <text x="379.1" y="406.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="16" fill="#c0caf5" text-anchor="start" font-weight="600" letter-spacing="1" transform="rotate(90 379.1 406)">GOWALLA</text>
-<text x="403.1" y="406.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="13" fill="#565f89" text-anchor="start" font-weight="400" letter-spacing="1" transform="rotate(90 403.1 406)">Nov ’10–’11 · 461</text>
+<text x="403.1" y="406.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="13" fill="#565f89" text-anchor="start" font-weight="400" letter-spacing="1" transform="rotate(90 403.1 406)">Lead Developer · Nov ’10–’11 · 461</text>
 <rect x="442.6" y="390" width="193.7" height="670" fill="#24283b" opacity="0.55"/>
 <text x="456.6" y="420.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="18" fill="#c0caf5" text-anchor="start" font-weight="600" letter-spacing="2">RETURN PATH</text>
 <text x="456.6" y="443.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="18" fill="#c0caf5" text-anchor="start" font-weight="600" letter-spacing="2">UNCOMMON</text>
-<text x="456.6" y="466.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="16" fill="#bb9af7" text-anchor="start" font-weight="400" >Austin.rb</text>
+<text x="456.6" y="466.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="16" fill="#bb9af7" text-anchor="start" font-weight="400" >Director, Engineering</text>
 <text x="456.6" y="490.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="15" fill="#565f89" text-anchor="start" font-weight="400" >2012–Apr ’14 · 843</text>
 <text x="645.7" y="406.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="16" fill="#c0caf5" text-anchor="start" font-weight="600" letter-spacing="1" transform="rotate(90 645.7 406)">LAST GUIDE</text>
 <text x="669.7" y="406.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="13" fill="#565f89" text-anchor="start" font-weight="400" letter-spacing="1" transform="rotate(90 669.7 406)">May–Nov ’14 · 494</text>
 <rect x="692.1" y="390" width="471.2" height="670" fill="#24283b" opacity="0.55"/>
 <text x="706.1" y="420.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="18" fill="#c0caf5" text-anchor="start" font-weight="600" letter-spacing="2">UNDER ARMOUR</text>
-<text x="706.1" y="443.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="16" fill="#bb9af7" text-anchor="start" font-weight="400" >Engineer career growth</text>
+<text x="706.1" y="443.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="16" fill="#bb9af7" text-anchor="start" font-weight="400" >Manager–Director, Engineering</text>
 <text x="706.1" y="467.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="15" fill="#565f89" text-anchor="start" font-weight="400" >2015–Aug ’20 · 677</text>
 <text x="1177.3" y="420.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="18" fill="#c0caf5" text-anchor="start" font-weight="600" letter-spacing="2">SAILPOINT</text>
-<text x="1177.3" y="445.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="15" fill="#565f89" text-anchor="start" font-weight="400" >Sep ’20–Jul ’23 · 98</text>
+<text x="1177.3" y="443.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="16" fill="#bb9af7" text-anchor="start" font-weight="400" >Director–Sr. Director,</text>
+<text x="1177.3" y="463.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="16" fill="#bb9af7" text-anchor="start" font-weight="400" >Engineering</text>
+<text x="1177.3" y="487.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="15" fill="#565f89" text-anchor="start" font-weight="400" >Sep ’20–Jul ’23 · 98</text>
 <rect x="1405.7" y="390" width="34.9" height="670" fill="#24283b" opacity="0.55"/>
 <text x="1408.1" y="406.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="16" fill="#c0caf5" text-anchor="start" font-weight="600" letter-spacing="1" transform="rotate(90 1408.1 406)">PRAXIS</text>
 <text x="1432.1" y="406.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="13" fill="#565f89" text-anchor="start" font-weight="400" letter-spacing="1" transform="rotate(90 1432.1 406)">Aug–Dec ’23 · 99</text>
 <text x="1454.5" y="420.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="18" fill="#c0caf5" text-anchor="start" font-weight="600" letter-spacing="2">OMC</text>
-<text x="1454.5" y="443.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="16" fill="#bb9af7" text-anchor="start" font-weight="400" >Agents</text>
-<text x="1454.5" y="467.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="15" fill="#565f89" text-anchor="start" font-weight="400" >2024–26 · 4,428</text>
+<text x="1454.5" y="443.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="16" fill="#bb9af7" text-anchor="start" font-weight="400" >COO &amp; Head of</text>
+<text x="1454.5" y="463.0" font-family='system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' font-size="16" fill="#bb9af7" text-anchor="start" font-weight="400" >Product/Engineering</text>
+<text x="1454.5" y="487.0" font-family='ui-monospace, "SF Mono", Menlo, monospace' font-size="15" fill="#565f89" text-anchor="start" font-weight="400" >2024–26 · 4,428</text>
 <g>
 <rect x="123.3" y="1055.6" width="56.5" height="4.4" fill="#9d7cd8"/>
 <rect x="123.3" y="1044.6" width="56.5" height="11.0" fill="#ff007c"/>

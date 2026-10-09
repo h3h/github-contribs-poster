@@ -135,7 +135,7 @@ def tag(cls, **data):
     return f' class="{cls}"' + "".join(f' data-{k}="{html.escape(str(v), quote=True)}"' for k, v in data.items())
 def text(x, y, s, size=16, fill=T["fg"], anchor="start", weight=400, family=FONT, extra=""):
     add(f'<text x="{x:.1f}" y="{y:.1f}" font-family=\'{family}\' font-size="{size}" fill="{fill}" '
-        f'text-anchor="{anchor}" font-weight="{weight}" {extra}>{s}</text>')
+        f'text-anchor="{anchor}" font-weight="{weight}" {extra}>{html.escape(str(s), quote=False)}</text>')
 
 
 # Header
@@ -173,6 +173,17 @@ def era_span(start, end):
     end_s = f"’{str(ey)[2:]}" if em == 12 or end == AS_OF else f"{MONTHS[em - 1]} ’{str(ey)[2:]}"
     return f"{start_s}–{end_s}"
 
+def wrap(s, width, size):
+    """Greedy word wrap using a rough average glyph width of 0.5em."""
+    lines, cur = [], ""
+    for word in s.split(" "):
+        trial = f"{cur} {word}".strip()
+        if cur and len(trial) * size * 0.5 > width:
+            lines.append(cur); cur = word
+        else:
+            cur = trial
+    return lines + [cur] if cur else lines
+
 band_top = top - 110
 for i, (start, end, titles, subs, shares) in enumerate(ERAS):
     end = end or AS_OF
@@ -187,15 +198,18 @@ for i, (start, end, titles, subs, shares) in enumerate(ERAS):
             f'{tag("era", title=" · ".join(titles), sub=" · ".join(subs), span=era_span(start, end), total=era_total, mix=mix)}/>')
     if ew < 110:  # too narrow for stacked labels: run them vertically down the band
         ty = band_top + 16
+        side = " · ".join(subs + [meta])
         for tx, s_, size, fill, fam, w8 in [(ex + ew / 2 - 15, " · ".join(t.upper() for t in titles), 16, T["bright"], FONT, 600),
-                                            (ex + ew / 2 + 9, meta, 13, T["muted"], MONO, 400)]:
+                                            (ex + ew / 2 + 9, side, 13, T["muted"], MONO, 400)]:
             text(tx, ty, s_, size, fill, weight=w8, family=fam, extra=f'letter-spacing="1" transform="rotate(90 {tx:.1f} {ty})"')
         continue
     ty = band_top + 30
     for t in titles:
         text(ex + 14, ty, t.upper(), 18, T["bright"], weight=600, extra='letter-spacing="2"'); ty += 23
     for t in subs:
-        text(ex + 14, ty, t, 16, T["sub"]); ty += 22
+        for line in wrap(t, ew - 24, 16):
+            text(ex + 14, ty, line, 16, T["sub"]); ty += 20
+        ty += 2
     text(ex + 14, ty + 2, meta, 15, T["muted"], family=MONO)
 
 for y in years:
